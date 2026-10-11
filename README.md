@@ -19,12 +19,33 @@ CLI
  |
 Node
  +-- Discovery (UDP)
+ |    +-- Peer announcements
+ |    +-- Peer tracking
+ |
  +-- Transport (TCP)
+ |    +-- Artifact requests
+ |    +-- Artifact transfers
+ |
  +-- Cache
- +-- Hash Ring
+ |    +-- Persistent storage
+ |
+ +-- Hashing
+ |    +-- SHA-256 content addressing
+ |    +-- Consistent hash ring
+ |
  +-- Replication
+ |    +-- Replica planning
+ |
  +-- Statistics
 ```
+
+### Data Flow
+
+1. `put` hashes an artifact and stores it in the local cache.
+2. Nodes discover peers through UDP broadcast.
+3. `get` checks the local cache and, on a cache miss, discovers available peers.
+4. The artifact is requested and transferred over TCP using its SHA-256 hash.
+5. The received content is verified and cached locally.
 
 ## Project Structure
 
@@ -139,20 +160,13 @@ Run the benchmark directly:
 go run ./benchmarks
 ```
 
-It reports the measured cache write throughput for the current machine. Example output on a typical Linux dev machine:
+It reports the measured cache write throughput for the current machine. Example output (illustrative):
 
 ```text
 puts=100 bytes=104857600 elapsed=19.88ms throughput=5029.31 MB/s
 ```
 
 Actual throughput depends on the machine, storage, workload, and operating system. Benchmark results are measurements, not guaranteed performance.
-
-## Tests
-
-```bash
-go test ./...
-go test -race ./...
-```
 
 ## Limitations
 
@@ -161,7 +175,14 @@ go test -race ./...
 - The CLI runs a single local node configuration per invocation. A short-lived `get` client needs a separate TCP port from a running `serve` process on the same machine.
 - Replica placement is static; rebalancing is not performed automatically.
 - Replica planning does not automatically push artifact copies to selected peers when an artifact is stored.
+- Artifact hashes must be shared manually; automatic artifact discovery by filename is not supported.
 - Successful automated tests do not guarantee that UDP discovery and TCP transfers will work on every LAN configuration.
+
+## Future Work
+
+- Implement distributed artifact discovery by filename, eliminating manual hash sharing.
+- Automate replica transfer and rebalancing.
+- Improve discovery and resilience across network partitions.
 
 ## License
 
