@@ -1,0 +1,15 @@
+# Go build outputs
+*.test
+p2cache
+*.out
+
+# Cache and temporary files
+.cache/
+tmp/
+
+# Environment files
+.env
+
+# Editors
+.idea/
+.vscode/
